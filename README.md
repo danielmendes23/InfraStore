@@ -16,12 +16,6 @@ O **InfraStore** é um projeto de banco de dados estruturado para suportar as op
 * **Linguagem:** SQL (DDL, DML e DQL)
 * **Modelagem:** Lucidchart (Diagrama Entidade-Relacionamento)
 
-## 📁 Estrutura do Repositório
-* `/docs`: Relatório arquitetural completo e imagens do Modelo Conceitual (MER).
-* `/sql/ddl.sql`: Scripts de criação das tabelas, chaves e tipos enumerados (ENUM).
-* `/sql/dml.sql`: Scripts de inserção (população do banco) para simulação de ambiente de produção.
-* `/sql/queries.sql`: Resolução de 11 desafios de negócio utilizando junções complexas e filtros dinâmicos.
-
 ---
 
 **Autores:** Enrique Ferreira da Silva e Daniel Mendes da Silva  
