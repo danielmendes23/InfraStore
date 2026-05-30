@@ -18,6 +18,7 @@ O **InfraStore** é um projeto de banco de dados estruturado para suportar as op
 
 ---
 
-**Autores:** Enrique Ferreira da Silva e Daniel Mendes da Silva  
 **Instituição:** Universidade Federal de Alagoas (UFAL) - Campus Arapiraca  
-**Curso:** Engenharia de Software
+**Discentes:** Enrique Ferreira da Silva e Daniel Mendes da Silva  
+**Disciplina:** Banco de Dados
+**Professor:** Rodolfo Carneiro
