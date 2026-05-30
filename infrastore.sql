@@ -1,6 +1,6 @@
 --DDL:
 
-create database infrastore
+create database infrastore;
 
 create schema infrastore;
 
@@ -82,9 +82,10 @@ create table infrastore.categoria
 create table infrastore.produto
 (
   cod_produto char(7) primary key,
-  preco_base decimal(10, 2) not null,
+  preco_base decimal(10, 2) not null CHECK (preco_base > 0.00),
   descricao_produto text not null,
   nome_produto varchar(50) not null,
+  quant_produto int not null CHECK (quant_produto >= 0),
   id_categoria_produto_fk int references infrastore.categoria(id_categoria_produto)
 );
 
@@ -263,13 +264,13 @@ INSERT INTO infrastore.categoria VALUES
 (6, 'Cabeamento Estruturado');
 
 INSERT INTO infrastore.produto VALUES 
-('PROD001', 15000.00, 'Servidor Rack 1U Xeon', 'Servidor PowerEdge', 1),
-('PROD002', 1200.00, 'Switch 24 portas Gigabit', 'Switch Cisco Catalyst', 2),
-('PROD003', 350.00, 'Roteador Dual Band', 'Roteador Wi-Fi 6', 2),
-('PROD004', 450.00, 'HD Externo 2TB USB 3.0', 'HD Externo Seagate', 3),
-('PROD005', 15.00, 'Cabo de rede Cat6 2 metros', 'Patch Cord Cat6', 6), 
-('PROD006', 45.00, 'Mouse óptico com fio', 'Mouse Básico Logi', 4),  
-('PROD007', 8000.00, 'Servidor Torre de entrada', 'Servidor Torre Dell', 1);
+('PROD001', 15000.00, 'Servidor Rack 1U Xeon', 'Servidor PowerEdge', 40, 1),
+('PROD002', 1200.00, 'Switch 24 portas Gigabit', 'Switch Cisco Catalyst', 54, 2),
+('PROD003', 350.00, 'Roteador Dual Band', 'Roteador Wi-Fi 6', 50, 2),
+('PROD004', 450.00, 'HD Externo 2TB USB 3.0', 'HD Externo Seagate', 20, 3),
+('PROD005', 15.00, 'Cabo de rede Cat6 2 metros', 'Patch Cord Cat6', 70, 6), 
+('PROD006', 45.00, 'Mouse óptico com fio', 'Mouse Básico Logi', 90, 4),  
+('PROD007', 8000.00, 'Servidor Torre de entrada', 'Servidor Torre Dell', 50, 1);
 
 INSERT INTO infrastore.transportadora VALUES 
 ('12345678000199', 5, 'Logística Rápida S/A'),
@@ -443,3 +444,5 @@ LEFT JOIN infrastore.pessoa_juridica j ON c.id_cliente = j.id_cliente_fk
 JOIN infrastore.pedido_produto pp ON p.numero_pedido = pp.numero_pedido_fk
 LEFT JOIN infrastore.pagamento pag ON p.numero_pedido = pag.numero_pedido_fk
 GROUP BY p.numero_pedido, j.razao_social_cliente, f.primeiro_nome_cliente,f.sobrenome_cliente,pag.status_pagamento;
+
+select * from infrastore.vw_resumo_pedidos;
