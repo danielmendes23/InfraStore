@@ -377,7 +377,6 @@ select p.nome_produto, c.nome_categoria
 from infrastore.produto p
 right join infrastore.categoria c on c.id_categoria_produto = p.id_categoria_produto_fk;
 
-5.1 - 
 select sum(pp.quantidade), sum(pp.preco_unitario * pp.quantidade), c.nome_categoria 
 from infrastore.categoria c
 join infrastore.produto p on p.id_categoria_produto_fk = c.id_categoria_produto
