@@ -446,3 +446,113 @@ LEFT JOIN infrastore.pagamento pag ON p.numero_pedido = pag.numero_pedido_fk
 GROUP BY p.numero_pedido, j.razao_social_cliente, f.primeiro_nome_cliente,f.sobrenome_cliente,pag.status_pagamento;
 
 select * from infrastore.vw_resumo_pedidos;
+
+-- Parte 2 
+
+-- Acelera relatórios de vendas baseados em datas
+CREATE INDEX idx_pedido_data ON infrastore.pedido(data_hora); 
+-- Acelera o processo de busca e login de clientes pelo e-mail
+CREATE INDEX idx_cliente_email ON infrastore.cliente(email_cliente);
+-- Otimiza as buscas e JOINs filtrados por categoria
+CREATE INDEX idx_produto_categoria ON infrastore.produto(id_categoria_produto_fk); 
+
+CREATE USER gerente_user WITH PASSWORD '123';
+CREATE USER operador_logistica_user WITH PASSWORD '123';
+CREATE USER analista_user WITH PASSWORD '123';
+
+CREATE ROLE Gerente_role;
+CREATE ROLE operador_logistica_role;
+CREATE ROLE analista_role; 
+
+GRANT Gerente_role TO gerente_user;
+GRANT analista_role TO analista_user; 
+GRANT operador_logistica_role TO operador_logistica_user;
+
+GRANT USAGE ON SCHEMA infrastore TO Gerente_role;
+GRANT SELECT ON ALL TABLES IN SCHEMA infrastore TO Gerente_role;
+GRANT UPDATE ON infrastore.produto TO Gerente_role;
+
+GRANT USAGE ON SCHEMA infrastore TO operador_logistica_role;
+GRANT SELECT, UPDATE ON infrastore.pedido TO operador_logistica_role;
+GRANT SELECT, UPDATE ON infrastore.produto TO operador_logistica_role;
+GRANT SELECT ON infrastore.transportadora, infrastore.endereco, infrastore.cep, infrastore.cidade 
+TO operador_logistica_role;
+
+GRANT USAGE ON SCHEMA infrastore TO analista_role; 
+GRANT SELECT ON ALL TABLES IN SCHEMA infrastore TO analista_role; 
+
+CREATE OR REPLACE VIEW College_Restricted_Logistica_View AS
+SELECT
+p.numero_pedido,
+p.status_pedido,
+p.data_hora,
+c.email_cliente,
+cep.logradouro,
+e.numero_casa,
+t.razao_social_transportadora
+FROM infrastore.pedido p
+JOIN infrastore.cliente c ON p.id_cliente_fk = c.id_cliente
+JOIN infrastore.endereco e ON p.id_endereco_fk = e.id_endereco
+JOIN infrastore.cep cep ON e.id_cep_fk = cep.id_cep
+JOIN infrastore.transportadora t ON p.cnpj_transportadora_fk = t.cnpj_transportadora;
+REVOKE ALL PRIVILEGES ON
+infrastore.pessoa_fisica,
+infrastore.pessoa_juridica,
+infrastore.pagamento
+FROM operador_logistica_role;
+GRANT SELECT ON College_Restricted_Logistica_View TO operador_logistica_role;
+
+
+CREATE OR REPLACE FUNCTION infrastore.tg_atualizar_gerente_produtos()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE infrastore.produto
+    SET preco_base = NEW.preco_base,
+        quant_produto = NEW.quant_produto,
+        nome_produto = NEW.nome_produto,
+        descricao_produto = NEW.descricao_produto
+    WHERE cod_produto = OLD.cod_produto;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_gerente_update_view
+INSTEAD OF UPDATE ON infrastore.vw_gerente_gestao_produtos
+FOR EACH ROW
+EXECUTE FUNCTION infrastore.tg_atualizar_gerente_produtos();
+
+CREATE OR REPLACE VIEW infrastore.vw_gerente_gestao_produtos AS
+SELECT 
+   p.cod_produto,
+   p.nome_produto,
+   p.preco_base,
+   p.quant_produto,
+   c.nome_categoria,
+   p.descricao_produto
+FROM infrastore.produto p
+JOIN infrastore.categoria c ON p.id_categoria_produto_fk = c.id_categoria_produto;
+
+GRANT SELECT, UPDATE ON infrastore.vw_gerente_gestao_produtos TO Gerente_role;
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+ALTER TABLE infrastore.funcionario ADD COLUMN senha_funcionario text;
+
+UPDATE infrastore.funcionario SET senha_funcionario = crypt('mudar123', gen_salt('bf'));
+
+ALTER TABLE infrastore.funcionario ALTER COLUMN senha_funcionario SET NOT NULL;
+
+UPDATE infrastore.funcionario 
+SET senha_funcionario = crypt('senhaAna123', gen_salt('bf')) WHERE matricula_funcionario = 'FUN001';
+
+UPDATE infrastore.funcionario 
+SET senha_funcionario = crypt('bruno@pass', gen_salt('bf')) WHERE matricula_funcionario = 'FUN002';
+
+UPDATE infrastore.funcionario 
+SET senha_funcionario = crypt('carlaAcesso', gen_salt('bf')) WHERE matricula_funcionario = 'FUN003';
+
+UPDATE infrastore.funcionario 
+SET senha_funcionario = crypt('diegoMudar9', gen_salt('bf')) WHERE matricula_funcionario = 'FUN004';
+
+UPDATE infrastore.funcionario 
+SET senha_funcionario = crypt('eva@2026', gen_salt('bf')) WHERE matricula_funcionario = 'FUN005';
